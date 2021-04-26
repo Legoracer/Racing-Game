@@ -8,7 +8,7 @@ public class Car extends ImageView {
     public double acceleration = 0;
     public double velocity = 0;
 
-    public static final double MAX_SPEED = 100.0;
+    public static final double MAX_SPEED = 1000.0;
     public static final double ACCELERATION = 0.25;
 
     public double speedModifier = 1;
@@ -20,6 +20,9 @@ public class Car extends ImageView {
     //      100*1.5 x 50*1.5
     //
 
+    /**
+     * Car class constructor
+     */
     public Car() {
         Image image = null;
 
@@ -32,7 +35,10 @@ public class Car extends ImageView {
         setImage(image);
     }
 
-
+    /**
+     * Internal method used to render the car.
+     * @param t time passed since last update
+     */
     public void render(double t) {
         this.velocity = this.acceleration;
         this.acceleration = 0;

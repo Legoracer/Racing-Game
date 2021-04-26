@@ -4,6 +4,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BiConsumer;
@@ -15,21 +16,27 @@ public class Server {
 
     ServerThread serverThread;
     Map<Integer, ClientThread> clients = new HashMap<>();
+    ArrayList<ChatMessage> messages = new ArrayList<>();
     volatile Map<Integer, Position> positions = new HashMap<>();
 
     int currentId = 0;
 
+    /**
+     * Class constructor
+     */
     public Server() {
         new ServerThread();
     }
 
-    // Server Thread
     public class ServerThread extends Thread {
 
         ServerSocket socket;
 
+        /**
+         * Class constructor
+         */
         public ServerThread() {
-            this.start();
+            this.start(); // Starts itself
         }
 
         public void run() {
@@ -46,8 +53,6 @@ public class Server {
                 try {
                     Socket clientSocket = socket.accept();
                     ClientThread clientThread = new ClientThread(clientSocket);
-
-                    // clients.PU(clientThread);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -63,6 +68,7 @@ public class Server {
         ObjectOutputStream outputStream;
 
         int id = -1;
+        int lastKnownMessage = 0;
 
         public ClientThread(Socket clientSocket) {
             this.clientSocket = clientSocket;
@@ -102,12 +108,28 @@ public class Server {
                                     }
                                 }
                             });
+
+                            outputStream.flush();
                             // outputStream.writeObject(positions);
+                        } else if (((String) input).equalsIgnoreCase("messages")) {
+                            int length = messages.size() - lastKnownMessage;
+                            outputStream.writeObject(length);
+                            for (int i=lastKnownMessage; i<messages.size(); i++) {
+                                outputStream.writeObject(messages.get(i));
+                            }
+
+                            // System.out.println();
+                            lastKnownMessage=messages.size();
+                            outputStream.flush();
                         }
                     } else if (input instanceof Position) {
                         Position pos = (Position) input;
                         // System.out.println(String.format("[%d] %.2f %.2f", id, pos.x, pos.y));
                         positions.put(this.id, pos);
+                    } else if (input instanceof ChatMessage) {
+                        ChatMessage message = (ChatMessage) input;
+                        message.client = String.valueOf(this.id);
+                        messages.add(message);
                     }
                 } catch (EOFException e) {
 

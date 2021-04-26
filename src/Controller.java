@@ -6,6 +6,12 @@ import java.util.HashMap;
 public class Controller {
     HashMap<KeyCode, Boolean> keysDown = new HashMap<>();
 
+    /**
+     * Class constructor
+     * <p>
+     * Sets up an AnimationTimer which updates currently active controls
+     * @param car client's car
+     */
     public Controller(Car car) {
         new AnimationTimer(){
 
@@ -41,14 +47,27 @@ public class Controller {
         }.start();
     }
 
+    /**
+     * Checks whether the keyCode is currently being pressed
+     * @param keyCode
+     * @return boolean
+     */
     public boolean isKeyDown(KeyCode keyCode) {
         return keysDown.containsKey(keyCode);
     }
 
+    /**
+     * Gets executed every time a button is getting pressed
+     * @param e KeyEvent
+     */
     public void keyPressed(KeyEvent e) {
         keysDown.put(e.getCode(), true);
     }
 
+    /**
+     * Gets executed every time a button stops getting pressed
+     * @param e KeyEvent
+     */
     public void keyReleased(KeyEvent e) {
         keysDown.remove(e.getCode());
     }
